@@ -1,18 +1,19 @@
 ﻿using TasksApi.Repositories;
 namespace TasksApi.Tests;
 
-public class Tests
+public class InMemoryTaskRepositoryTests
 {
-    private InMemoryTaskRepository r = new();
+    private InMemoryTaskRepository r = null;
 
     [SetUp]
     public void SetUp()
-    {        
+    {
+        r = new InMemoryTaskRepository();
     }
 
     [TestCase("")]
     [TestCase(" ")]    
-    public void NullReturned(string title)
+    public void BlankTitleReturnsEmptyTask(string title)
     {
         var result = r.Add(title);
         
