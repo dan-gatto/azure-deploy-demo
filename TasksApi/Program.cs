@@ -9,6 +9,12 @@ builder.Services.AddHealthChecks();
 
 var app = builder.Build();
 
+// Seed sample tasks.
+var repository = app.Services.GetRequiredService<ITaskRepository>();
+repository.Add("Task1");
+repository.Add("Task2");
+repository.Add("Task3");
+
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();

@@ -21,7 +21,7 @@ public class InMemoryTaskRepository : ITaskRepository
 
     public TaskItem Add(string title)
     {
-        if (string.IsNullOrEmpty(title) || string.IsNullOrEmpty(title.Trim()))
+        if (string.IsNullOrWhiteSpace(title))
         {
             return new TaskItem();
         }
