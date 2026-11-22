@@ -1,0 +1,47 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  IMAGE: ${{ vars.ACR_NAME }}.azurecr.io/tasksapi
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Test
+        run: dotnet test --configuration Release
+
+  deploy:
+    needs: build-test
+    if: github.event_name == 'push'      # PRs only build and test; pushes to main deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to Azure
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Build and push image
+        run: |
+          az acr login --name ${{ vars.ACR_NAME }}
+          docker build -t $IMAGE:${{ github.sha }} .
+          docker push $IMAGE:${{ github.sha }}
+
+      - name: Deploy to App Service
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ vars.APP_NAME }}
+          images: ${{ env.IMAGE }}:${{ github.sha }}
